@@ -1,0 +1,1469 @@
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"WatchDogTimer.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.WD_Start,"ax",%progbits
+  20              		.align	2
+  21              		.global	WD_Start
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	WD_Start, %function
+  25              	WD_Start:
+  26              	.LFB111:
+  27              		.file 1 "source\\bsw\\WatchDogTimer.c"
+   1:source\bsw/WatchDogTimer.c **** /**
+   2:source\bsw/WatchDogTimer.c **** * \file <filename>
+   3:source\bsw/WatchDogTimer.c **** * \author <author-name>
+   4:source\bsw/WatchDogTimer.c **** * \date <date>
+   5:source\bsw/WatchDogTimer.c **** *
+   6:source\bsw/WatchDogTimer.c **** * \brief <Symbolic File name>
+   7:source\bsw/WatchDogTimer.c **** *
+   8:source\bsw/WatchDogTimer.c **** * \copyright Copyright ©2016
+   9:source\bsw/WatchDogTimer.c **** * Department of electrical engineering and information technology, Hochschule Darmstadt - Universit
+  10:source\bsw/WatchDogTimer.c **** * Permission to use, copy, modify, and distribute this software and its documentation for education
+  11:source\bsw/WatchDogTimer.c **** * (unless permitted by h_da) and official h_da projects, is hereby granted for enrolled students of
+  12:source\bsw/WatchDogTimer.c **** * this paragraph and the following paragraph appear in all copies, modifications, and distributions
+  13:source\bsw/WatchDogTimer.c **** * Contact Prof.Dr.-Ing. Peter Fromm, peter.fromm@h-da.de, Birkenweg 8 64295 Darmstadt - GERMANY for
+  14:source\bsw/WatchDogTimer.c **** *
+  15:source\bsw/WatchDogTimer.c **** * \warning This software is a PROTOTYPE version and is not designed or intended for use in producti
+  16:source\bsw/WatchDogTimer.c **** * The user represents and warrants that it will NOT use or redistribute the Software for such purpo
+  17:source\bsw/WatchDogTimer.c **** * This prototype is for research purposes only. This software is provided "AS IS," without a warran
+  18:source\bsw/WatchDogTimer.c **** */
+  19:source\bsw/WatchDogTimer.c **** 
+  20:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  21:source\bsw/WatchDogTimer.c **** /* Include files                                                             */
+  22:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  23:source\bsw/WatchDogTimer.c **** #include "global.h"
+  24:source\bsw/WatchDogTimer.c **** #include <stdio.h>
+  25:source\bsw/WatchDogTimer.c **** #include <stdlib.h>
+  26:source\bsw/WatchDogTimer.c **** #include "WatchDogTimer.h"
+  27:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  28:source\bsw/WatchDogTimer.c **** /* Local pre-processor symbols/macros ('#define')                            */
+  29:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  30:source\bsw/WatchDogTimer.c **** 
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 2
+
+
+  31:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  32:source\bsw/WatchDogTimer.c **** /* Global variable definitions (declared in header file with 'extern')       */
+  33:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  34:source\bsw/WatchDogTimer.c **** 
+  35:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  36:source\bsw/WatchDogTimer.c **** /* Local type definitions ('typedef')                                        */
+  37:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  38:source\bsw/WatchDogTimer.c **** 
+  39:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  40:source\bsw/WatchDogTimer.c **** /* Local variable definitions ('static')                                     */
+  41:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  42:source\bsw/WatchDogTimer.c **** 
+  43:source\bsw/WatchDogTimer.c **** 
+  44:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  45:source\bsw/WatchDogTimer.c **** /* Local function prototypes ('static')                                      */
+  46:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  47:source\bsw/WatchDogTimer.c **** uint8_t WD_RunnableAliveBitField;
+  48:source\bsw/WatchDogTimer.c **** 
+  49:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  50:source\bsw/WatchDogTimer.c **** /* Function implementation - global ('extern') and local ('static')          */
+  51:source\bsw/WatchDogTimer.c **** /*****************************************************************************/
+  52:source\bsw/WatchDogTimer.c **** 
+  53:source\bsw/WatchDogTimer.c **** /**
+  54:source\bsw/WatchDogTimer.c **** * Activate the Watchdog Trigger
+  55:source\bsw/WatchDogTimer.c **** * \param WDT_TimeOut_t timeout - [IN] Timeout Period
+  56:source\bsw/WatchDogTimer.c **** * @return RC_SUCCESS
+  57:source\bsw/WatchDogTimer.c **** */
+  58:source\bsw/WatchDogTimer.c **** RC_t WD_Start( WDT_TimeOut_t timeout)
+  59:source\bsw/WatchDogTimer.c **** {
+  28              		.loc 1 59 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 08B5     		push	{r3, lr}
+  34              		.cfi_def_cfa_offset 8
+  35              		.cfi_offset 3, -8
+  36              		.cfi_offset 14, -4
+  60:source\bsw/WatchDogTimer.c ****     CyWdtStart(timeout, CYWDT_LPMODE_NOCHANGE);
+  37              		.loc 1 60 0
+  38 0002 0021     		movs	r1, #0
+  39 0004 FFF7FEFF 		bl	CyWdtStart
+  40              	.LVL1:
+  61:source\bsw/WatchDogTimer.c ****     return RC_SUCCESS;
+  62:source\bsw/WatchDogTimer.c **** }
+  41              		.loc 1 62 0
+  42 0008 0020     		movs	r0, #0
+  43 000a 08BD     		pop	{r3, pc}
+  44              		.cfi_endproc
+  45              	.LFE111:
+  46              		.size	WD_Start, .-WD_Start
+  47              		.section	.text.WD_Trigger,"ax",%progbits
+  48              		.align	2
+  49              		.global	WD_Trigger
+  50              		.thumb
+  51              		.thumb_func
+  52              		.type	WD_Trigger, %function
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 3
+
+
+  53              	WD_Trigger:
+  54              	.LFB112:
+  63:source\bsw/WatchDogTimer.c **** 
+  64:source\bsw/WatchDogTimer.c **** /**
+  65:source\bsw/WatchDogTimer.c **** * Service the Watchdog Trigger
+  66:source\bsw/WatchDogTimer.c **** * @return RC_SUCCESS
+  67:source\bsw/WatchDogTimer.c **** */
+  68:source\bsw/WatchDogTimer.c **** RC_t WD_Trigger()
+  69:source\bsw/WatchDogTimer.c **** {
+  55              		.loc 1 69 0
+  56              		.cfi_startproc
+  57              		@ args = 0, pretend = 0, frame = 0
+  58              		@ frame_needed = 0, uses_anonymous_args = 0
+  59 0000 08B5     		push	{r3, lr}
+  60              		.cfi_def_cfa_offset 8
+  61              		.cfi_offset 3, -8
+  62              		.cfi_offset 14, -4
+  70:source\bsw/WatchDogTimer.c ****     if(WD_RunnableAliveBitField == 0x0f)
+  63              		.loc 1 70 0
+  64 0002 054B     		ldr	r3, .L6
+  65 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  66 0006 0F2B     		cmp	r3, #15
+  67 0008 04D1     		bne	.L4
+  71:source\bsw/WatchDogTimer.c ****     {
+  72:source\bsw/WatchDogTimer.c ****         CyWdtClear();
+  68              		.loc 1 72 0
+  69 000a FFF7FEFF 		bl	CyWdtClear
+  70              	.LVL2:
+  73:source\bsw/WatchDogTimer.c ****         WD_RunnableAliveBitField = 0;
+  71              		.loc 1 73 0
+  72 000e 0022     		movs	r2, #0
+  73 0010 014B     		ldr	r3, .L6
+  74 0012 1A70     		strb	r2, [r3]
+  75              	.L4:
+  74:source\bsw/WatchDogTimer.c ****     }    
+  75:source\bsw/WatchDogTimer.c ****     return RC_SUCCESS;
+  76:source\bsw/WatchDogTimer.c **** }
+  76              		.loc 1 76 0
+  77 0014 0020     		movs	r0, #0
+  78 0016 08BD     		pop	{r3, pc}
+  79              	.L7:
+  80              		.align	2
+  81              	.L6:
+  82 0018 00000000 		.word	WD_RunnableAliveBitField
+  83              		.cfi_endproc
+  84              	.LFE112:
+  85              		.size	WD_Trigger, .-WD_Trigger
+  86              		.section	.text.WD_CheckResetBit,"ax",%progbits
+  87              		.align	2
+  88              		.global	WD_CheckResetBit
+  89              		.thumb
+  90              		.thumb_func
+  91              		.type	WD_CheckResetBit, %function
+  92              	WD_CheckResetBit:
+  93              	.LFB113:
+  77:source\bsw/WatchDogTimer.c **** 
+  78:source\bsw/WatchDogTimer.c **** /**
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 4
+
+
+  79:source\bsw/WatchDogTimer.c **** * Checks the watchdog bit
+  80:source\bsw/WatchDogTimer.c **** * @return TRUE if watchdog reset bit was set
+  81:source\bsw/WatchDogTimer.c **** */
+  82:source\bsw/WatchDogTimer.c **** boolean_t WD_CheckResetBit()
+  83:source\bsw/WatchDogTimer.c **** {
+  94              		.loc 1 83 0
+  95              		.cfi_startproc
+  96              		@ args = 0, pretend = 0, frame = 0
+  97              		@ frame_needed = 0, uses_anonymous_args = 0
+  98              		@ link register save eliminated.
+  84:source\bsw/WatchDogTimer.c ****     if(CyResetStatus & CY_RESET_WD)
+  99              		.loc 1 84 0
+ 100 0000 044B     		ldr	r3, .L10
+ 101 0002 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 102 0004 03F00803 		and	r3, r3, #8
+ 103 0008 03F0FF00 		and	r0, r3, #255
+ 104 000c 03B1     		cbz	r3, .L9
+  85:source\bsw/WatchDogTimer.c ****     {
+  86:source\bsw/WatchDogTimer.c ****         return TRUE;
+ 105              		.loc 1 86 0
+ 106 000e 0120     		movs	r0, #1
+ 107              	.L9:
+  87:source\bsw/WatchDogTimer.c ****     }
+  88:source\bsw/WatchDogTimer.c ****     else
+  89:source\bsw/WatchDogTimer.c ****     {
+  90:source\bsw/WatchDogTimer.c ****         return FALSE;
+  91:source\bsw/WatchDogTimer.c ****     }
+  92:source\bsw/WatchDogTimer.c **** }
+ 108              		.loc 1 92 0
+ 109 0010 7047     		bx	lr
+ 110              	.L11:
+ 111 0012 00BF     		.align	2
+ 112              	.L10:
+ 113 0014 00000000 		.word	CyResetStatus
+ 114              		.cfi_endproc
+ 115              	.LFE113:
+ 116              		.size	WD_CheckResetBit, .-WD_CheckResetBit
+ 117              		.section	.text.WD_Alive,"ax",%progbits
+ 118              		.align	2
+ 119              		.global	WD_Alive
+ 120              		.thumb
+ 121              		.thumb_func
+ 122              		.type	WD_Alive, %function
+ 123              	WD_Alive:
+ 124              	.LFB114:
+  93:source\bsw/WatchDogTimer.c **** 
+  94:source\bsw/WatchDogTimer.c **** /**
+  95:source\bsw/WatchDogTimer.c **** * This function sets the bit at the corresponding position.
+  96:source\bsw/WatchDogTimer.c **** * It is called by every runnable using a uniqe position.
+  97:source\bsw/WatchDogTimer.c **** * 0 = JoyStick_run, 1 = Control_run, 2 = Engine_run, 3 = brakelight_run
+  98:source\bsw/WatchDogTimer.c **** * @return RC_SUCCESS
+  99:source\bsw/WatchDogTimer.c **** */
+ 100:source\bsw/WatchDogTimer.c **** RC_t WD_Alive(uint8_t myBitPosition)
+ 101:source\bsw/WatchDogTimer.c **** {
+ 125              		.loc 1 101 0
+ 126              		.cfi_startproc
+ 127              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 5
+
+
+ 128              		@ frame_needed = 0, uses_anonymous_args = 0
+ 129              		@ link register save eliminated.
+ 130              	.LVL3:
+ 102:source\bsw/WatchDogTimer.c ****     WD_RunnableAliveBitField |= (1U) << myBitPosition;
+ 131              		.loc 1 102 0
+ 132 0000 0123     		movs	r3, #1
+ 133 0002 03FA00F0 		lsl	r0, r3, r0
+ 134              	.LVL4:
+ 135 0006 034A     		ldr	r2, .L13
+ 136 0008 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 137 000a 1843     		orrs	r0, r0, r3
+ 138 000c 1070     		strb	r0, [r2]
+ 103:source\bsw/WatchDogTimer.c ****     
+ 104:source\bsw/WatchDogTimer.c ****     return RC_SUCCESS;
+ 105:source\bsw/WatchDogTimer.c **** }...
+ 139              		.loc 1 105 0
+ 140 000e 0020     		movs	r0, #0
+ 141 0010 7047     		bx	lr
+ 142              	.L14:
+ 143 0012 00BF     		.align	2
+ 144              	.L13:
+ 145 0014 00000000 		.word	WD_RunnableAliveBitField
+ 146              		.cfi_endproc
+ 147              	.LFE114:
+ 148              		.size	WD_Alive, .-WD_Alive
+ 149              		.comm	WD_RunnableAliveBitField,1,1
+ 150              		.text
+ 151              	.Letext0:
+ 152              		.file 2 "source\\bsw\\global.h"
+ 153              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 154              		.file 4 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 155              		.file 5 "Generated_Source\\PSoC5/cytypes.h"
+ 156              		.file 6 "Generated_Source\\PSoC5/ErikaOS_1_common_ee_types.inc"
+ 157              		.file 7 "Generated_Source\\PSoC5/ErikaOS_1_cortex_mx_ee_cpu.inc"
+ 158              		.file 8 "source\\bsw\\WatchDogTimer.h"
+ 159              		.file 9 "Generated_Source\\PSoC5/ErikaOS_1_ee_oo_intfunc.inc"
+ 160              		.file 10 "Generated_Source\\PSoC5/ErikaOS_1_cortex_mx_ee_context.inc"
+ 161              		.file 11 "Generated_Source\\PSoC5/ErikaOS_1_common_ee_primitives.inc"
+ 162              		.file 12 "Generated_Source\\PSoC5/CyLib.h"
+ 163              		.file 13 "Generated_Source\\PSoC5/core_cm3.h"
+ 164              		.section	.debug_info,"",%progbits
+ 165              	.Ldebug_info0:
+ 166 0000 F5020000 		.4byte	0x2f5
+ 167 0004 0400     		.2byte	0x4
+ 168 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 169 000a 04       		.byte	0x4
+ 170 000b 01       		.uleb128 0x1
+ 171 000c C2020000 		.4byte	.LASF70
+ 172 0010 0C       		.byte	0xc
+ 173 0011 9D040000 		.4byte	.LASF71
+ 174 0015 24040000 		.4byte	.LASF72
+ 175 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 176 001d 00000000 		.4byte	0
+ 177 0021 00000000 		.4byte	.Ldebug_line0
+ 178 0025 02       		.uleb128 0x2
+ 179 0026 01       		.byte	0x1
+ 180 0027 06       		.byte	0x6
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 6
+
+
+ 181 0028 28020000 		.4byte	.LASF0
+ 182 002c 03       		.uleb128 0x3
+ 183 002d AC000000 		.4byte	.LASF10
+ 184 0031 02       		.byte	0x2
+ 185 0032 91       		.byte	0x91
+ 186 0033 37000000 		.4byte	0x37
+ 187 0037 02       		.uleb128 0x2
+ 188 0038 01       		.byte	0x1
+ 189 0039 08       		.byte	0x8
+ 190 003a 1A020000 		.4byte	.LASF1
+ 191 003e 02       		.uleb128 0x2
+ 192 003f 02       		.byte	0x2
+ 193 0040 05       		.byte	0x5
+ 194 0041 38000000 		.4byte	.LASF2
+ 195 0045 02       		.uleb128 0x2
+ 196 0046 02       		.byte	0x2
+ 197 0047 07       		.byte	0x7
+ 198 0048 AF020000 		.4byte	.LASF3
+ 199 004c 02       		.uleb128 0x2
+ 200 004d 04       		.byte	0x4
+ 201 004e 05       		.byte	0x5
+ 202 004f A5010000 		.4byte	.LASF4
+ 203 0053 02       		.uleb128 0x2
+ 204 0054 04       		.byte	0x4
+ 205 0055 07       		.byte	0x7
+ 206 0056 C5030000 		.4byte	.LASF5
+ 207 005a 02       		.uleb128 0x2
+ 208 005b 04       		.byte	0x4
+ 209 005c 04       		.byte	0x4
+ 210 005d 2F010000 		.4byte	.LASF6
+ 211 0061 02       		.uleb128 0x2
+ 212 0062 08       		.byte	0x8
+ 213 0063 04       		.byte	0x4
+ 214 0064 D7030000 		.4byte	.LASF7
+ 215 0068 02       		.uleb128 0x2
+ 216 0069 08       		.byte	0x8
+ 217 006a 05       		.byte	0x5
+ 218 006b 4E010000 		.4byte	.LASF8
+ 219 006f 02       		.uleb128 0x2
+ 220 0070 08       		.byte	0x8
+ 221 0071 07       		.byte	0x7
+ 222 0072 34020000 		.4byte	.LASF9
+ 223 0076 03       		.uleb128 0x3
+ 224 0077 F1010000 		.4byte	.LASF11
+ 225 007b 02       		.byte	0x2
+ 226 007c 9C       		.byte	0x9c
+ 227 007d 37000000 		.4byte	0x37
+ 228 0081 02       		.uleb128 0x2
+ 229 0082 01       		.byte	0x1
+ 230 0083 08       		.byte	0x8
+ 231 0084 50030000 		.4byte	.LASF12
+ 232 0088 04       		.uleb128 0x4
+ 233 0089 01       		.byte	0x1
+ 234 008a 25000000 		.4byte	0x25
+ 235 008e 02       		.byte	0x2
+ 236 008f CF       		.byte	0xcf
+ 237 0090 31010000 		.4byte	0x131
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 7
+
+
+ 238 0094 05       		.uleb128 0x5
+ 239 0095 0E000000 		.4byte	.LASF13
+ 240 0099 00       		.byte	0
+ 241 009a 06       		.uleb128 0x6
+ 242 009b 94040000 		.4byte	.LASF14
+ 243 009f 7F       		.sleb128 -1
+ 244 00a0 06       		.uleb128 0x6
+ 245 00a1 74020000 		.4byte	.LASF15
+ 246 00a5 7E       		.sleb128 -2
+ 247 00a6 06       		.uleb128 0x6
+ 248 00a7 71000000 		.4byte	.LASF16
+ 249 00ab 7D       		.sleb128 -3
+ 250 00ac 06       		.uleb128 0x6
+ 251 00ad B8040000 		.4byte	.LASF17
+ 252 00b1 7C       		.sleb128 -4
+ 253 00b2 06       		.uleb128 0x6
+ 254 00b3 20010000 		.4byte	.LASF18
+ 255 00b7 7B       		.sleb128 -5
+ 256 00b8 06       		.uleb128 0x6
+ 257 00b9 42000000 		.4byte	.LASF19
+ 258 00bd 7A       		.sleb128 -6
+ 259 00be 06       		.uleb128 0x6
+ 260 00bf AE010000 		.4byte	.LASF20
+ 261 00c3 79       		.sleb128 -7
+ 262 00c4 06       		.uleb128 0x6
+ 263 00c5 55030000 		.4byte	.LASF21
+ 264 00c9 78       		.sleb128 -8
+ 265 00ca 06       		.uleb128 0x6
+ 266 00cb 82020000 		.4byte	.LASF22
+ 267 00cf 77       		.sleb128 -9
+ 268 00d0 06       		.uleb128 0x6
+ 269 00d1 C0010000 		.4byte	.LASF23
+ 270 00d5 76       		.sleb128 -10
+ 271 00d6 06       		.uleb128 0x6
+ 272 00d7 F8040000 		.4byte	.LASF24
+ 273 00db 75       		.sleb128 -11
+ 274 00dc 06       		.uleb128 0x6
+ 275 00dd 58020000 		.4byte	.LASF25
+ 276 00e1 74       		.sleb128 -12
+ 277 00e2 06       		.uleb128 0x6
+ 278 00e3 DE030000 		.4byte	.LASF26
+ 279 00e7 73       		.sleb128 -13
+ 280 00e8 06       		.uleb128 0x6
+ 281 00e9 FB010000 		.4byte	.LASF27
+ 282 00ed 72       		.sleb128 -14
+ 283 00ee 06       		.uleb128 0x6
+ 284 00ef 24000000 		.4byte	.LASF28
+ 285 00f3 71       		.sleb128 -15
+ 286 00f4 06       		.uleb128 0x6
+ 287 00f5 CE010000 		.4byte	.LASF29
+ 288 00f9 70       		.sleb128 -16
+ 289 00fa 06       		.uleb128 0x6
+ 290 00fb 7D030000 		.4byte	.LASF30
+ 291 00ff 6F       		.sleb128 -17
+ 292 0100 06       		.uleb128 0x6
+ 293 0101 53000000 		.4byte	.LASF31
+ 294 0105 6E       		.sleb128 -18
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 8
+
+
+ 295 0106 06       		.uleb128 0x6
+ 296 0107 81010000 		.4byte	.LASF32
+ 297 010b 6D       		.sleb128 -19
+ 298 010c 06       		.uleb128 0x6
+ 299 010d 91030000 		.4byte	.LASF33
+ 300 0111 6C       		.sleb128 -20
+ 301 0112 06       		.uleb128 0x6
+ 302 0113 DF010000 		.4byte	.LASF34
+ 303 0117 6B       		.sleb128 -21
+ 304 0118 06       		.uleb128 0x6
+ 305 0119 69040000 		.4byte	.LASF35
+ 306 011d 6A       		.sleb128 -22
+ 307 011e 06       		.uleb128 0x6
+ 308 011f B4000000 		.4byte	.LASF36
+ 309 0123 69       		.sleb128 -23
+ 310 0124 06       		.uleb128 0x6
+ 311 0125 94010000 		.4byte	.LASF37
+ 312 0129 68       		.sleb128 -24
+ 313 012a 06       		.uleb128 0x6
+ 314 012b 35010000 		.4byte	.LASF38
+ 315 012f 67       		.sleb128 -25
+ 316 0130 00       		.byte	0
+ 317 0131 03       		.uleb128 0x3
+ 318 0132 E8040000 		.4byte	.LASF39
+ 319 0136 02       		.byte	0x2
+ 320 0137 EA       		.byte	0xea
+ 321 0138 88000000 		.4byte	0x88
+ 322 013c 03       		.uleb128 0x3
+ 323 013d F8030000 		.4byte	.LASF40
+ 324 0141 03       		.byte	0x3
+ 325 0142 3F       		.byte	0x3f
+ 326 0143 4C000000 		.4byte	0x4c
+ 327 0147 07       		.uleb128 0x7
+ 328 0148 04       		.byte	0x4
+ 329 0149 05       		.byte	0x5
+ 330 014a 696E7400 		.ascii	"int\000"
+ 331 014e 02       		.uleb128 0x2
+ 332 014f 04       		.byte	0x4
+ 333 0150 07       		.byte	0x7
+ 334 0151 4B020000 		.4byte	.LASF41
+ 335 0155 02       		.uleb128 0x2
+ 336 0156 08       		.byte	0x8
+ 337 0157 04       		.byte	0x4
+ 338 0158 0E020000 		.4byte	.LASF42
+ 339 015c 02       		.uleb128 0x2
+ 340 015d 04       		.byte	0x4
+ 341 015e 07       		.byte	0x7
+ 342 015f 68000000 		.4byte	.LASF43
+ 343 0163 03       		.uleb128 0x3
+ 344 0164 6A030000 		.4byte	.LASF44
+ 345 0168 04       		.byte	0x4
+ 346 0169 2C       		.byte	0x2c
+ 347 016a 3C010000 		.4byte	0x13c
+ 348 016e 08       		.uleb128 0x8
+ 349 016f DC000000 		.4byte	.LASF45
+ 350 0173 05       		.byte	0x5
+ 351 0174 E901     		.2byte	0x1e9
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 9
+
+
+ 352 0176 37000000 		.4byte	0x37
+ 353 017a 03       		.uleb128 0x3
+ 354 017b 98020000 		.4byte	.LASF46
+ 355 017f 06       		.byte	0x6
+ 356 0180 53       		.byte	0x53
+ 357 0181 47010000 		.4byte	0x147
+ 358 0185 03       		.uleb128 0x3
+ 359 0186 9B000000 		.4byte	.LASF47
+ 360 018a 06       		.byte	0x6
+ 361 018b 54       		.byte	0x54
+ 362 018c 4E010000 		.4byte	0x14e
+ 363 0190 03       		.uleb128 0x3
+ 364 0191 F0030000 		.4byte	.LASF48
+ 365 0195 07       		.byte	0x7
+ 366 0196 4D       		.byte	0x4d
+ 367 0197 85010000 		.4byte	0x185
+ 368 019b 03       		.uleb128 0x3
+ 369 019c 7F000000 		.4byte	.LASF49
+ 370 01a0 07       		.byte	0x7
+ 371 01a1 4F       		.byte	0x4f
+ 372 01a2 85010000 		.4byte	0x185
+ 373 01a6 03       		.uleb128 0x3
+ 374 01a7 A5000000 		.4byte	.LASF50
+ 375 01ab 07       		.byte	0x7
+ 376 01ac 78       		.byte	0x78
+ 377 01ad 7A010000 		.4byte	0x17a
+ 378 01b1 09       		.uleb128 0x9
+ 379 01b2 7B040000 		.4byte	.LASF73
+ 380 01b6 01       		.byte	0x1
+ 381 01b7 37000000 		.4byte	0x37
+ 382 01bb 08       		.byte	0x8
+ 383 01bc 5A       		.byte	0x5a
+ 384 01bd DA010000 		.4byte	0x1da
+ 385 01c1 05       		.uleb128 0x5
+ 386 01c2 75010000 		.4byte	.LASF51
+ 387 01c6 00       		.byte	0
+ 388 01c7 05       		.uleb128 0x5
+ 389 01c8 66020000 		.4byte	.LASF52
+ 390 01cc 01       		.byte	0x1
+ 391 01cd 05       		.uleb128 0x5
+ 392 01ce F7000000 		.4byte	.LASF53
+ 393 01d2 02       		.byte	0x2
+ 394 01d3 05       		.uleb128 0x5
+ 395 01d4 90000000 		.4byte	.LASF54
+ 396 01d8 03       		.byte	0x3
+ 397 01d9 00       		.byte	0
+ 398 01da 03       		.uleb128 0x3
+ 399 01db A4030000 		.4byte	.LASF55
+ 400 01df 08       		.byte	0x8
+ 401 01e0 60       		.byte	0x60
+ 402 01e1 B1010000 		.4byte	0x1b1
+ 403 01e5 0A       		.uleb128 0xa
+ 404 01e6 87000000 		.4byte	.LASF56
+ 405 01ea 01       		.byte	0x1
+ 406 01eb 3A       		.byte	0x3a
+ 407 01ec 31010000 		.4byte	0x131
+ 408 01f0 00000000 		.4byte	.LFB111
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 10
+
+
+ 409 01f4 0C000000 		.4byte	.LFE111-.LFB111
+ 410 01f8 01       		.uleb128 0x1
+ 411 01f9 9C       		.byte	0x9c
+ 412 01fa 1D020000 		.4byte	0x21d
+ 413 01fe 0B       		.uleb128 0xb
+ 414 01ff E0040000 		.4byte	.LASF58
+ 415 0203 01       		.byte	0x1
+ 416 0204 3A       		.byte	0x3a
+ 417 0205 DA010000 		.4byte	0x1da
+ 418 0209 00000000 		.4byte	.LLST0
+ 419 020d 0C       		.uleb128 0xc
+ 420 020e 08000000 		.4byte	.LVL1
+ 421 0212 E2020000 		.4byte	0x2e2
+ 422 0216 0D       		.uleb128 0xd
+ 423 0217 01       		.uleb128 0x1
+ 424 0218 51       		.byte	0x51
+ 425 0219 01       		.uleb128 0x1
+ 426 021a 30       		.byte	0x30
+ 427 021b 00       		.byte	0
+ 428 021c 00       		.byte	0
+ 429 021d 0E       		.uleb128 0xe
+ 430 021e 19000000 		.4byte	.LASF74
+ 431 0222 01       		.byte	0x1
+ 432 0223 44       		.byte	0x44
+ 433 0224 31010000 		.4byte	0x131
+ 434 0228 00000000 		.4byte	.LFB112
+ 435 022c 1C000000 		.4byte	.LFE112-.LFB112
+ 436 0230 01       		.uleb128 0x1
+ 437 0231 9C       		.byte	0x9c
+ 438 0232 40020000 		.4byte	0x240
+ 439 0236 0F       		.uleb128 0xf
+ 440 0237 0E000000 		.4byte	.LVL2
+ 441 023b ED020000 		.4byte	0x2ed
+ 442 023f 00       		.byte	0
+ 443 0240 10       		.uleb128 0x10
+ 444 0241 CB000000 		.4byte	.LASF75
+ 445 0245 01       		.byte	0x1
+ 446 0246 52       		.byte	0x52
+ 447 0247 76000000 		.4byte	0x76
+ 448 024b 00000000 		.4byte	.LFB113
+ 449 024f 18000000 		.4byte	.LFE113-.LFB113
+ 450 0253 01       		.uleb128 0x1
+ 451 0254 9C       		.byte	0x9c
+ 452 0255 0A       		.uleb128 0xa
+ 453 0256 1B040000 		.4byte	.LASF57
+ 454 025a 01       		.byte	0x1
+ 455 025b 64       		.byte	0x64
+ 456 025c 31010000 		.4byte	0x131
+ 457 0260 00000000 		.4byte	.LFB114
+ 458 0264 18000000 		.4byte	.LFE114-.LFB114
+ 459 0268 01       		.uleb128 0x1
+ 460 0269 9C       		.byte	0x9c
+ 461 026a 7E020000 		.4byte	0x27e
+ 462 026e 0B       		.uleb128 0xb
+ 463 026f 00000000 		.4byte	.LASF59
+ 464 0273 01       		.byte	0x1
+ 465 0274 64       		.byte	0x64
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 11
+
+
+ 466 0275 2C000000 		.4byte	0x2c
+ 467 0279 21000000 		.4byte	.LLST1
+ 468 027d 00       		.byte	0
+ 469 027e 11       		.uleb128 0x11
+ 470 027f C8040000 		.4byte	.LASF60
+ 471 0283 09       		.byte	0x9
+ 472 0284 40       		.byte	0x40
+ 473 0285 90010000 		.4byte	0x190
+ 474 0289 11       		.uleb128 0x11
+ 475 028a 5C010000 		.4byte	.LASF61
+ 476 028e 09       		.byte	0x9
+ 477 028f 47       		.byte	0x47
+ 478 0290 9B010000 		.4byte	0x19b
+ 479 0294 11       		.uleb128 0x11
+ 480 0295 B2030000 		.4byte	.LASF62
+ 481 0299 09       		.byte	0x9
+ 482 029a 4A       		.byte	0x4a
+ 483 029b 90010000 		.4byte	0x190
+ 484 029f 11       		.uleb128 0x11
+ 485 02a0 07010000 		.4byte	.LASF63
+ 486 02a4 0A       		.byte	0xa
+ 487 02a5 48       		.byte	0x48
+ 488 02a6 A6010000 		.4byte	0x1a6
+ 489 02aa 11       		.uleb128 0x11
+ 490 02ab E2000000 		.4byte	.LASF64
+ 491 02af 0B       		.byte	0xb
+ 492 02b0 44       		.byte	0x44
+ 493 02b1 90010000 		.4byte	0x190
+ 494 02b5 11       		.uleb128 0x11
+ 495 02b6 A1020000 		.4byte	.LASF65
+ 496 02ba 0C       		.byte	0xc
+ 497 02bb 2C       		.byte	0x2c
+ 498 02bc 6E010000 		.4byte	0x16e
+ 499 02c0 12       		.uleb128 0x12
+ 500 02c1 87040000 		.4byte	.LASF66
+ 501 02c5 0D       		.byte	0xd
+ 502 02c6 1207     		.2byte	0x712
+ 503 02c8 CC020000 		.4byte	0x2cc
+ 504 02cc 13       		.uleb128 0x13
+ 505 02cd 63010000 		.4byte	0x163
+ 506 02d1 14       		.uleb128 0x14
+ 507 02d2 02040000 		.4byte	.LASF67
+ 508 02d6 01       		.byte	0x1
+ 509 02d7 2F       		.byte	0x2f
+ 510 02d8 2C000000 		.4byte	0x2c
+ 511 02dc 05       		.uleb128 0x5
+ 512 02dd 03       		.byte	0x3
+ 513 02de 00000000 		.4byte	WD_RunnableAliveBitField
+ 514 02e2 15       		.uleb128 0x15
+ 515 02e3 72030000 		.4byte	.LASF68
+ 516 02e7 72030000 		.4byte	.LASF68
+ 517 02eb 0C       		.byte	0xc
+ 518 02ec 72       		.byte	0x72
+ 519 02ed 15       		.uleb128 0x15
+ 520 02ee ED040000 		.4byte	.LASF69
+ 521 02f2 ED040000 		.4byte	.LASF69
+ 522 02f6 0C       		.byte	0xc
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 12
+
+
+ 523 02f7 73       		.byte	0x73
+ 524 02f8 00       		.byte	0
+ 525              		.section	.debug_abbrev,"",%progbits
+ 526              	.Ldebug_abbrev0:
+ 527 0000 01       		.uleb128 0x1
+ 528 0001 11       		.uleb128 0x11
+ 529 0002 01       		.byte	0x1
+ 530 0003 25       		.uleb128 0x25
+ 531 0004 0E       		.uleb128 0xe
+ 532 0005 13       		.uleb128 0x13
+ 533 0006 0B       		.uleb128 0xb
+ 534 0007 03       		.uleb128 0x3
+ 535 0008 0E       		.uleb128 0xe
+ 536 0009 1B       		.uleb128 0x1b
+ 537 000a 0E       		.uleb128 0xe
+ 538 000b 55       		.uleb128 0x55
+ 539 000c 17       		.uleb128 0x17
+ 540 000d 11       		.uleb128 0x11
+ 541 000e 01       		.uleb128 0x1
+ 542 000f 10       		.uleb128 0x10
+ 543 0010 17       		.uleb128 0x17
+ 544 0011 00       		.byte	0
+ 545 0012 00       		.byte	0
+ 546 0013 02       		.uleb128 0x2
+ 547 0014 24       		.uleb128 0x24
+ 548 0015 00       		.byte	0
+ 549 0016 0B       		.uleb128 0xb
+ 550 0017 0B       		.uleb128 0xb
+ 551 0018 3E       		.uleb128 0x3e
+ 552 0019 0B       		.uleb128 0xb
+ 553 001a 03       		.uleb128 0x3
+ 554 001b 0E       		.uleb128 0xe
+ 555 001c 00       		.byte	0
+ 556 001d 00       		.byte	0
+ 557 001e 03       		.uleb128 0x3
+ 558 001f 16       		.uleb128 0x16
+ 559 0020 00       		.byte	0
+ 560 0021 03       		.uleb128 0x3
+ 561 0022 0E       		.uleb128 0xe
+ 562 0023 3A       		.uleb128 0x3a
+ 563 0024 0B       		.uleb128 0xb
+ 564 0025 3B       		.uleb128 0x3b
+ 565 0026 0B       		.uleb128 0xb
+ 566 0027 49       		.uleb128 0x49
+ 567 0028 13       		.uleb128 0x13
+ 568 0029 00       		.byte	0
+ 569 002a 00       		.byte	0
+ 570 002b 04       		.uleb128 0x4
+ 571 002c 04       		.uleb128 0x4
+ 572 002d 01       		.byte	0x1
+ 573 002e 0B       		.uleb128 0xb
+ 574 002f 0B       		.uleb128 0xb
+ 575 0030 49       		.uleb128 0x49
+ 576 0031 13       		.uleb128 0x13
+ 577 0032 3A       		.uleb128 0x3a
+ 578 0033 0B       		.uleb128 0xb
+ 579 0034 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 13
+
+
+ 580 0035 0B       		.uleb128 0xb
+ 581 0036 01       		.uleb128 0x1
+ 582 0037 13       		.uleb128 0x13
+ 583 0038 00       		.byte	0
+ 584 0039 00       		.byte	0
+ 585 003a 05       		.uleb128 0x5
+ 586 003b 28       		.uleb128 0x28
+ 587 003c 00       		.byte	0
+ 588 003d 03       		.uleb128 0x3
+ 589 003e 0E       		.uleb128 0xe
+ 590 003f 1C       		.uleb128 0x1c
+ 591 0040 0B       		.uleb128 0xb
+ 592 0041 00       		.byte	0
+ 593 0042 00       		.byte	0
+ 594 0043 06       		.uleb128 0x6
+ 595 0044 28       		.uleb128 0x28
+ 596 0045 00       		.byte	0
+ 597 0046 03       		.uleb128 0x3
+ 598 0047 0E       		.uleb128 0xe
+ 599 0048 1C       		.uleb128 0x1c
+ 600 0049 0D       		.uleb128 0xd
+ 601 004a 00       		.byte	0
+ 602 004b 00       		.byte	0
+ 603 004c 07       		.uleb128 0x7
+ 604 004d 24       		.uleb128 0x24
+ 605 004e 00       		.byte	0
+ 606 004f 0B       		.uleb128 0xb
+ 607 0050 0B       		.uleb128 0xb
+ 608 0051 3E       		.uleb128 0x3e
+ 609 0052 0B       		.uleb128 0xb
+ 610 0053 03       		.uleb128 0x3
+ 611 0054 08       		.uleb128 0x8
+ 612 0055 00       		.byte	0
+ 613 0056 00       		.byte	0
+ 614 0057 08       		.uleb128 0x8
+ 615 0058 16       		.uleb128 0x16
+ 616 0059 00       		.byte	0
+ 617 005a 03       		.uleb128 0x3
+ 618 005b 0E       		.uleb128 0xe
+ 619 005c 3A       		.uleb128 0x3a
+ 620 005d 0B       		.uleb128 0xb
+ 621 005e 3B       		.uleb128 0x3b
+ 622 005f 05       		.uleb128 0x5
+ 623 0060 49       		.uleb128 0x49
+ 624 0061 13       		.uleb128 0x13
+ 625 0062 00       		.byte	0
+ 626 0063 00       		.byte	0
+ 627 0064 09       		.uleb128 0x9
+ 628 0065 04       		.uleb128 0x4
+ 629 0066 01       		.byte	0x1
+ 630 0067 03       		.uleb128 0x3
+ 631 0068 0E       		.uleb128 0xe
+ 632 0069 0B       		.uleb128 0xb
+ 633 006a 0B       		.uleb128 0xb
+ 634 006b 49       		.uleb128 0x49
+ 635 006c 13       		.uleb128 0x13
+ 636 006d 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 14
+
+
+ 637 006e 0B       		.uleb128 0xb
+ 638 006f 3B       		.uleb128 0x3b
+ 639 0070 0B       		.uleb128 0xb
+ 640 0071 01       		.uleb128 0x1
+ 641 0072 13       		.uleb128 0x13
+ 642 0073 00       		.byte	0
+ 643 0074 00       		.byte	0
+ 644 0075 0A       		.uleb128 0xa
+ 645 0076 2E       		.uleb128 0x2e
+ 646 0077 01       		.byte	0x1
+ 647 0078 3F       		.uleb128 0x3f
+ 648 0079 19       		.uleb128 0x19
+ 649 007a 03       		.uleb128 0x3
+ 650 007b 0E       		.uleb128 0xe
+ 651 007c 3A       		.uleb128 0x3a
+ 652 007d 0B       		.uleb128 0xb
+ 653 007e 3B       		.uleb128 0x3b
+ 654 007f 0B       		.uleb128 0xb
+ 655 0080 27       		.uleb128 0x27
+ 656 0081 19       		.uleb128 0x19
+ 657 0082 49       		.uleb128 0x49
+ 658 0083 13       		.uleb128 0x13
+ 659 0084 11       		.uleb128 0x11
+ 660 0085 01       		.uleb128 0x1
+ 661 0086 12       		.uleb128 0x12
+ 662 0087 06       		.uleb128 0x6
+ 663 0088 40       		.uleb128 0x40
+ 664 0089 18       		.uleb128 0x18
+ 665 008a 9742     		.uleb128 0x2117
+ 666 008c 19       		.uleb128 0x19
+ 667 008d 01       		.uleb128 0x1
+ 668 008e 13       		.uleb128 0x13
+ 669 008f 00       		.byte	0
+ 670 0090 00       		.byte	0
+ 671 0091 0B       		.uleb128 0xb
+ 672 0092 05       		.uleb128 0x5
+ 673 0093 00       		.byte	0
+ 674 0094 03       		.uleb128 0x3
+ 675 0095 0E       		.uleb128 0xe
+ 676 0096 3A       		.uleb128 0x3a
+ 677 0097 0B       		.uleb128 0xb
+ 678 0098 3B       		.uleb128 0x3b
+ 679 0099 0B       		.uleb128 0xb
+ 680 009a 49       		.uleb128 0x49
+ 681 009b 13       		.uleb128 0x13
+ 682 009c 02       		.uleb128 0x2
+ 683 009d 17       		.uleb128 0x17
+ 684 009e 00       		.byte	0
+ 685 009f 00       		.byte	0
+ 686 00a0 0C       		.uleb128 0xc
+ 687 00a1 898201   		.uleb128 0x4109
+ 688 00a4 01       		.byte	0x1
+ 689 00a5 11       		.uleb128 0x11
+ 690 00a6 01       		.uleb128 0x1
+ 691 00a7 31       		.uleb128 0x31
+ 692 00a8 13       		.uleb128 0x13
+ 693 00a9 00       		.byte	0
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 15
+
+
+ 694 00aa 00       		.byte	0
+ 695 00ab 0D       		.uleb128 0xd
+ 696 00ac 8A8201   		.uleb128 0x410a
+ 697 00af 00       		.byte	0
+ 698 00b0 02       		.uleb128 0x2
+ 699 00b1 18       		.uleb128 0x18
+ 700 00b2 9142     		.uleb128 0x2111
+ 701 00b4 18       		.uleb128 0x18
+ 702 00b5 00       		.byte	0
+ 703 00b6 00       		.byte	0
+ 704 00b7 0E       		.uleb128 0xe
+ 705 00b8 2E       		.uleb128 0x2e
+ 706 00b9 01       		.byte	0x1
+ 707 00ba 3F       		.uleb128 0x3f
+ 708 00bb 19       		.uleb128 0x19
+ 709 00bc 03       		.uleb128 0x3
+ 710 00bd 0E       		.uleb128 0xe
+ 711 00be 3A       		.uleb128 0x3a
+ 712 00bf 0B       		.uleb128 0xb
+ 713 00c0 3B       		.uleb128 0x3b
+ 714 00c1 0B       		.uleb128 0xb
+ 715 00c2 49       		.uleb128 0x49
+ 716 00c3 13       		.uleb128 0x13
+ 717 00c4 11       		.uleb128 0x11
+ 718 00c5 01       		.uleb128 0x1
+ 719 00c6 12       		.uleb128 0x12
+ 720 00c7 06       		.uleb128 0x6
+ 721 00c8 40       		.uleb128 0x40
+ 722 00c9 18       		.uleb128 0x18
+ 723 00ca 9742     		.uleb128 0x2117
+ 724 00cc 19       		.uleb128 0x19
+ 725 00cd 01       		.uleb128 0x1
+ 726 00ce 13       		.uleb128 0x13
+ 727 00cf 00       		.byte	0
+ 728 00d0 00       		.byte	0
+ 729 00d1 0F       		.uleb128 0xf
+ 730 00d2 898201   		.uleb128 0x4109
+ 731 00d5 00       		.byte	0
+ 732 00d6 11       		.uleb128 0x11
+ 733 00d7 01       		.uleb128 0x1
+ 734 00d8 31       		.uleb128 0x31
+ 735 00d9 13       		.uleb128 0x13
+ 736 00da 00       		.byte	0
+ 737 00db 00       		.byte	0
+ 738 00dc 10       		.uleb128 0x10
+ 739 00dd 2E       		.uleb128 0x2e
+ 740 00de 00       		.byte	0
+ 741 00df 3F       		.uleb128 0x3f
+ 742 00e0 19       		.uleb128 0x19
+ 743 00e1 03       		.uleb128 0x3
+ 744 00e2 0E       		.uleb128 0xe
+ 745 00e3 3A       		.uleb128 0x3a
+ 746 00e4 0B       		.uleb128 0xb
+ 747 00e5 3B       		.uleb128 0x3b
+ 748 00e6 0B       		.uleb128 0xb
+ 749 00e7 49       		.uleb128 0x49
+ 750 00e8 13       		.uleb128 0x13
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 16
+
+
+ 751 00e9 11       		.uleb128 0x11
+ 752 00ea 01       		.uleb128 0x1
+ 753 00eb 12       		.uleb128 0x12
+ 754 00ec 06       		.uleb128 0x6
+ 755 00ed 40       		.uleb128 0x40
+ 756 00ee 18       		.uleb128 0x18
+ 757 00ef 9742     		.uleb128 0x2117
+ 758 00f1 19       		.uleb128 0x19
+ 759 00f2 00       		.byte	0
+ 760 00f3 00       		.byte	0
+ 761 00f4 11       		.uleb128 0x11
+ 762 00f5 34       		.uleb128 0x34
+ 763 00f6 00       		.byte	0
+ 764 00f7 03       		.uleb128 0x3
+ 765 00f8 0E       		.uleb128 0xe
+ 766 00f9 3A       		.uleb128 0x3a
+ 767 00fa 0B       		.uleb128 0xb
+ 768 00fb 3B       		.uleb128 0x3b
+ 769 00fc 0B       		.uleb128 0xb
+ 770 00fd 49       		.uleb128 0x49
+ 771 00fe 13       		.uleb128 0x13
+ 772 00ff 3F       		.uleb128 0x3f
+ 773 0100 19       		.uleb128 0x19
+ 774 0101 3C       		.uleb128 0x3c
+ 775 0102 19       		.uleb128 0x19
+ 776 0103 00       		.byte	0
+ 777 0104 00       		.byte	0
+ 778 0105 12       		.uleb128 0x12
+ 779 0106 34       		.uleb128 0x34
+ 780 0107 00       		.byte	0
+ 781 0108 03       		.uleb128 0x3
+ 782 0109 0E       		.uleb128 0xe
+ 783 010a 3A       		.uleb128 0x3a
+ 784 010b 0B       		.uleb128 0xb
+ 785 010c 3B       		.uleb128 0x3b
+ 786 010d 05       		.uleb128 0x5
+ 787 010e 49       		.uleb128 0x49
+ 788 010f 13       		.uleb128 0x13
+ 789 0110 3F       		.uleb128 0x3f
+ 790 0111 19       		.uleb128 0x19
+ 791 0112 3C       		.uleb128 0x3c
+ 792 0113 19       		.uleb128 0x19
+ 793 0114 00       		.byte	0
+ 794 0115 00       		.byte	0
+ 795 0116 13       		.uleb128 0x13
+ 796 0117 35       		.uleb128 0x35
+ 797 0118 00       		.byte	0
+ 798 0119 49       		.uleb128 0x49
+ 799 011a 13       		.uleb128 0x13
+ 800 011b 00       		.byte	0
+ 801 011c 00       		.byte	0
+ 802 011d 14       		.uleb128 0x14
+ 803 011e 34       		.uleb128 0x34
+ 804 011f 00       		.byte	0
+ 805 0120 03       		.uleb128 0x3
+ 806 0121 0E       		.uleb128 0xe
+ 807 0122 3A       		.uleb128 0x3a
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 17
+
+
+ 808 0123 0B       		.uleb128 0xb
+ 809 0124 3B       		.uleb128 0x3b
+ 810 0125 0B       		.uleb128 0xb
+ 811 0126 49       		.uleb128 0x49
+ 812 0127 13       		.uleb128 0x13
+ 813 0128 3F       		.uleb128 0x3f
+ 814 0129 19       		.uleb128 0x19
+ 815 012a 02       		.uleb128 0x2
+ 816 012b 18       		.uleb128 0x18
+ 817 012c 00       		.byte	0
+ 818 012d 00       		.byte	0
+ 819 012e 15       		.uleb128 0x15
+ 820 012f 2E       		.uleb128 0x2e
+ 821 0130 00       		.byte	0
+ 822 0131 3F       		.uleb128 0x3f
+ 823 0132 19       		.uleb128 0x19
+ 824 0133 3C       		.uleb128 0x3c
+ 825 0134 19       		.uleb128 0x19
+ 826 0135 6E       		.uleb128 0x6e
+ 827 0136 0E       		.uleb128 0xe
+ 828 0137 03       		.uleb128 0x3
+ 829 0138 0E       		.uleb128 0xe
+ 830 0139 3A       		.uleb128 0x3a
+ 831 013a 0B       		.uleb128 0xb
+ 832 013b 3B       		.uleb128 0x3b
+ 833 013c 0B       		.uleb128 0xb
+ 834 013d 00       		.byte	0
+ 835 013e 00       		.byte	0
+ 836 013f 00       		.byte	0
+ 837              		.section	.debug_loc,"",%progbits
+ 838              	.Ldebug_loc0:
+ 839              	.LLST0:
+ 840 0000 00000000 		.4byte	.LVL0
+ 841 0004 07000000 		.4byte	.LVL1-1
+ 842 0008 0100     		.2byte	0x1
+ 843 000a 50       		.byte	0x50
+ 844 000b 07000000 		.4byte	.LVL1-1
+ 845 000f 0C000000 		.4byte	.LFE111
+ 846 0013 0400     		.2byte	0x4
+ 847 0015 F3       		.byte	0xf3
+ 848 0016 01       		.uleb128 0x1
+ 849 0017 50       		.byte	0x50
+ 850 0018 9F       		.byte	0x9f
+ 851 0019 00000000 		.4byte	0
+ 852 001d 00000000 		.4byte	0
+ 853              	.LLST1:
+ 854 0021 00000000 		.4byte	.LVL3
+ 855 0025 06000000 		.4byte	.LVL4
+ 856 0029 0100     		.2byte	0x1
+ 857 002b 50       		.byte	0x50
+ 858 002c 06000000 		.4byte	.LVL4
+ 859 0030 18000000 		.4byte	.LFE114
+ 860 0034 0400     		.2byte	0x4
+ 861 0036 F3       		.byte	0xf3
+ 862 0037 01       		.uleb128 0x1
+ 863 0038 50       		.byte	0x50
+ 864 0039 9F       		.byte	0x9f
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 18
+
+
+ 865 003a 00000000 		.4byte	0
+ 866 003e 00000000 		.4byte	0
+ 867              		.section	.debug_aranges,"",%progbits
+ 868 0000 34000000 		.4byte	0x34
+ 869 0004 0200     		.2byte	0x2
+ 870 0006 00000000 		.4byte	.Ldebug_info0
+ 871 000a 04       		.byte	0x4
+ 872 000b 00       		.byte	0
+ 873 000c 0000     		.2byte	0
+ 874 000e 0000     		.2byte	0
+ 875 0010 00000000 		.4byte	.LFB111
+ 876 0014 0C000000 		.4byte	.LFE111-.LFB111
+ 877 0018 00000000 		.4byte	.LFB112
+ 878 001c 1C000000 		.4byte	.LFE112-.LFB112
+ 879 0020 00000000 		.4byte	.LFB113
+ 880 0024 18000000 		.4byte	.LFE113-.LFB113
+ 881 0028 00000000 		.4byte	.LFB114
+ 882 002c 18000000 		.4byte	.LFE114-.LFB114
+ 883 0030 00000000 		.4byte	0
+ 884 0034 00000000 		.4byte	0
+ 885              		.section	.debug_ranges,"",%progbits
+ 886              	.Ldebug_ranges0:
+ 887 0000 00000000 		.4byte	.LFB111
+ 888 0004 0C000000 		.4byte	.LFE111
+ 889 0008 00000000 		.4byte	.LFB112
+ 890 000c 1C000000 		.4byte	.LFE112
+ 891 0010 00000000 		.4byte	.LFB113
+ 892 0014 18000000 		.4byte	.LFE113
+ 893 0018 00000000 		.4byte	.LFB114
+ 894 001c 18000000 		.4byte	.LFE114
+ 895 0020 00000000 		.4byte	0
+ 896 0024 00000000 		.4byte	0
+ 897              		.section	.debug_line,"",%progbits
+ 898              	.Ldebug_line0:
+ 899 0000 88020000 		.section	.debug_str,"MS",%progbits,1
+ 899      02003802 
+ 899      00000201 
+ 899      FB0E0D00 
+ 899      01010101 
+ 900              	.LASF59:
+ 901 0000 6D794269 		.ascii	"myBitPosition\000"
+ 901      74506F73 
+ 901      6974696F 
+ 901      6E00
+ 902              	.LASF13:
+ 903 000e 52435F53 		.ascii	"RC_SUCCESS\000"
+ 903      55434345 
+ 903      535300
+ 904              	.LASF74:
+ 905 0019 57445F54 		.ascii	"WD_Trigger\000"
+ 905      72696767 
+ 905      657200
+ 906              	.LASF28:
+ 907 0024 52435F45 		.ascii	"RC_ERROR_WRITE_ONLY\000"
+ 907      52524F52 
+ 907      5F575249 
+ 907      54455F4F 
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 19
+
+
+ 907      4E4C5900 
+ 908              	.LASF2:
+ 909 0038 73686F72 		.ascii	"short int\000"
+ 909      7420696E 
+ 909      7400
+ 910              	.LASF19:
+ 911 0042 52435F45 		.ascii	"RC_ERROR_OVERRUN\000"
+ 911      52524F52 
+ 911      5F4F5645 
+ 911      5252554E 
+ 911      00
+ 912              	.LASF31:
+ 913 0053 52435F45 		.ascii	"RC_ERROR_WRITE_FAILS\000"
+ 913      52524F52 
+ 913      5F575249 
+ 913      54455F46 
+ 913      41494C53 
+ 914              	.LASF43:
+ 915 0068 73697A65 		.ascii	"sizetype\000"
+ 915      74797065 
+ 915      00
+ 916              	.LASF16:
+ 917 0071 52435F45 		.ascii	"RC_ERROR_ZERO\000"
+ 917      52524F52 
+ 917      5F5A4552 
+ 917      4F00
+ 918              	.LASF49:
+ 919 007f 45455F46 		.ascii	"EE_FREG\000"
+ 919      52454700 
+ 920              	.LASF56:
+ 921 0087 57445F53 		.ascii	"WD_Start\000"
+ 921      74617274 
+ 921      00
+ 922              	.LASF54:
+ 923 0090 7469636B 		.ascii	"ticks_2_3s\000"
+ 923      735F325F 
+ 923      337300
+ 924              	.LASF47:
+ 925 009b 45455F55 		.ascii	"EE_UINT32\000"
+ 925      494E5433 
+ 925      3200
+ 926              	.LASF50:
+ 927 00a5 45455F54 		.ascii	"EE_TID\000"
+ 927      494400
+ 928              	.LASF10:
+ 929 00ac 75696E74 		.ascii	"uint8_t\000"
+ 929      385F7400 
+ 930              	.LASF36:
+ 931 00b4 52435F45 		.ascii	"RC_ERROR_INVALID_STATE\000"
+ 931      52524F52 
+ 931      5F494E56 
+ 931      414C4944 
+ 931      5F535441 
+ 932              	.LASF75:
+ 933 00cb 57445F43 		.ascii	"WD_CheckResetBit\000"
+ 933      6865636B 
+ 933      52657365 
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 20
+
+
+ 933      74426974 
+ 933      00
+ 934              	.LASF45:
+ 935 00dc 75696E74 		.ascii	"uint8\000"
+ 935      3800
+ 936              	.LASF64:
+ 937 00e2 45455F49 		.ascii	"EE_IRQ_nesting_level\000"
+ 937      52515F6E 
+ 937      65737469 
+ 937      6E675F6C 
+ 937      6576656C 
+ 938              	.LASF53:
+ 939 00f7 7469636B 		.ascii	"ticks_256_384ms\000"
+ 939      735F3235 
+ 939      365F3338 
+ 939      346D7300 
+ 940              	.LASF63:
+ 941 0107 45455F73 		.ascii	"EE_std_endcycle_next_tid\000"
+ 941      74645F65 
+ 941      6E646379 
+ 941      636C655F 
+ 941      6E657874 
+ 942              	.LASF18:
+ 943 0120 52435F45 		.ascii	"RC_ERROR_RANGE\000"
+ 943      52524F52 
+ 943      5F52414E 
+ 943      474500
+ 944              	.LASF6:
+ 945 012f 666C6F61 		.ascii	"float\000"
+ 945      7400
+ 946              	.LASF38:
+ 947 0135 52435F45 		.ascii	"RC_ERROR_NOT_IMPLEMENTED\000"
+ 947      52524F52 
+ 947      5F4E4F54 
+ 947      5F494D50 
+ 947      4C454D45 
+ 948              	.LASF8:
+ 949 014e 6C6F6E67 		.ascii	"long long int\000"
+ 949      206C6F6E 
+ 949      6720696E 
+ 949      7400
+ 950              	.LASF61:
+ 951 015c 45455F6F 		.ascii	"EE_oo_IRQ_suspend_status\000"
+ 951      6F5F4952 
+ 951      515F7375 
+ 951      7370656E 
+ 951      645F7374 
+ 952              	.LASF51:
+ 953 0175 7469636B 		.ascii	"ticks_4_6ms\000"
+ 953      735F345F 
+ 953      366D7300 
+ 954              	.LASF32:
+ 955 0181 52435F45 		.ascii	"RC_ERROR_NOT_MATCH\000"
+ 955      52524F52 
+ 955      5F4E4F54 
+ 955      5F4D4154 
+ 955      434800
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 21
+
+
+ 956              	.LASF37:
+ 957 0194 52435F45 		.ascii	"RC_ERROR_UNKNOWN\000"
+ 957      52524F52 
+ 957      5F554E4B 
+ 957      4E4F574E 
+ 957      00
+ 958              	.LASF4:
+ 959 01a5 6C6F6E67 		.ascii	"long int\000"
+ 959      20696E74 
+ 959      00
+ 960              	.LASF20:
+ 961 01ae 52435F45 		.ascii	"RC_ERROR_UNDERRUN\000"
+ 961      52524F52 
+ 961      5F554E44 
+ 961      45525255 
+ 961      4E00
+ 962              	.LASF23:
+ 963 01c0 52435F45 		.ascii	"RC_ERROR_BUSY\000"
+ 963      52524F52 
+ 963      5F425553 
+ 963      5900
+ 964              	.LASF29:
+ 965 01ce 52435F45 		.ascii	"RC_ERROR_INVALID\000"
+ 965      52524F52 
+ 965      5F494E56 
+ 965      414C4944 
+ 965      00
+ 966              	.LASF34:
+ 967 01df 52435F45 		.ascii	"RC_ERROR_BAD_DATA\000"
+ 967      52524F52 
+ 967      5F424144 
+ 967      5F444154 
+ 967      4100
+ 968              	.LASF11:
+ 969 01f1 626F6F6C 		.ascii	"boolean_t\000"
+ 969      65616E5F 
+ 969      7400
+ 970              	.LASF27:
+ 971 01fb 52435F45 		.ascii	"RC_ERROR_READ_ONLY\000"
+ 971      52524F52 
+ 971      5F524541 
+ 971      445F4F4E 
+ 971      4C5900
+ 972              	.LASF42:
+ 973 020e 6C6F6E67 		.ascii	"long double\000"
+ 973      20646F75 
+ 973      626C6500 
+ 974              	.LASF1:
+ 975 021a 756E7369 		.ascii	"unsigned char\000"
+ 975      676E6564 
+ 975      20636861 
+ 975      7200
+ 976              	.LASF0:
+ 977 0228 7369676E 		.ascii	"signed char\000"
+ 977      65642063 
+ 977      68617200 
+ 978              	.LASF9:
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 22
+
+
+ 979 0234 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 979      206C6F6E 
+ 979      6720756E 
+ 979      7369676E 
+ 979      65642069 
+ 980              	.LASF41:
+ 981 024b 756E7369 		.ascii	"unsigned int\000"
+ 981      676E6564 
+ 981      20696E74 
+ 981      00
+ 982              	.LASF25:
+ 983 0258 52435F45 		.ascii	"RC_ERROR_OPEN\000"
+ 983      52524F52 
+ 983      5F4F5045 
+ 983      4E00
+ 984              	.LASF52:
+ 985 0266 7469636B 		.ascii	"ticks_32_48ms\000"
+ 985      735F3332 
+ 985      5F34386D 
+ 985      7300
+ 986              	.LASF15:
+ 987 0274 52435F45 		.ascii	"RC_ERROR_NULL\000"
+ 987      52524F52 
+ 987      5F4E554C 
+ 987      4C00
+ 988              	.LASF22:
+ 989 0282 52435F45 		.ascii	"RC_ERROR_BUFFER_EMTPY\000"
+ 989      52524F52 
+ 989      5F425546 
+ 989      4645525F 
+ 989      454D5450 
+ 990              	.LASF46:
+ 991 0298 45455F49 		.ascii	"EE_INT32\000"
+ 991      4E543332 
+ 991      00
+ 992              	.LASF65:
+ 993 02a1 43795265 		.ascii	"CyResetStatus\000"
+ 993      73657453 
+ 993      74617475 
+ 993      7300
+ 994              	.LASF3:
+ 995 02af 73686F72 		.ascii	"short unsigned int\000"
+ 995      7420756E 
+ 995      7369676E 
+ 995      65642069 
+ 995      6E7400
+ 996              	.LASF70:
+ 997 02c2 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 997      43313120 
+ 997      352E342E 
+ 997      31203230 
+ 997      31363036 
+ 998 02f5 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 998      20726576 
+ 998      6973696F 
+ 998      6E203233 
+ 998      37373135 
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 23
+
+
+ 999 0328 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 999      66756E63 
+ 999      74696F6E 
+ 999      2D736563 
+ 999      74696F6E 
+ 1000              	.LASF12:
+ 1001 0350 63686172 		.ascii	"char\000"
+ 1001      00
+ 1002              	.LASF21:
+ 1003 0355 52435F45 		.ascii	"RC_ERROR_BUFFER_FULL\000"
+ 1003      52524F52 
+ 1003      5F425546 
+ 1003      4645525F 
+ 1003      46554C4C 
+ 1004              	.LASF44:
+ 1005 036a 696E7433 		.ascii	"int32_t\000"
+ 1005      325F7400 
+ 1006              	.LASF68:
+ 1007 0372 43795764 		.ascii	"CyWdtStart\000"
+ 1007      74537461 
+ 1007      727400
+ 1008              	.LASF30:
+ 1009 037d 52435F45 		.ascii	"RC_ERROR_READ_FAILS\000"
+ 1009      52524F52 
+ 1009      5F524541 
+ 1009      445F4641 
+ 1009      494C5300 
+ 1010              	.LASF33:
+ 1011 0391 52435F45 		.ascii	"RC_ERROR_BAD_PARAM\000"
+ 1011      52524F52 
+ 1011      5F424144 
+ 1011      5F504152 
+ 1011      414D00
+ 1012              	.LASF55:
+ 1013 03a4 5744545F 		.ascii	"WDT_TimeOut_t\000"
+ 1013      54696D65 
+ 1013      4F75745F 
+ 1013      7400
+ 1014              	.LASF62:
+ 1015 03b2 45455F41 		.ascii	"EE_ApplicationMode\000"
+ 1015      70706C69 
+ 1015      63617469 
+ 1015      6F6E4D6F 
+ 1015      646500
+ 1016              	.LASF5:
+ 1017 03c5 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1017      20756E73 
+ 1017      69676E65 
+ 1017      6420696E 
+ 1017      7400
+ 1018              	.LASF7:
+ 1019 03d7 646F7562 		.ascii	"double\000"
+ 1019      6C6500
+ 1020              	.LASF26:
+ 1021 03de 52435F45 		.ascii	"RC_ERROR_CHECKSUM\000"
+ 1021      52524F52 
+ 1021      5F434845 
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 24
+
+
+ 1021      434B5355 
+ 1021      4D00
+ 1022              	.LASF48:
+ 1023 03f0 45455F55 		.ascii	"EE_UREG\000"
+ 1023      52454700 
+ 1024              	.LASF40:
+ 1025 03f8 5F5F696E 		.ascii	"__int32_t\000"
+ 1025      7433325F 
+ 1025      7400
+ 1026              	.LASF67:
+ 1027 0402 57445F52 		.ascii	"WD_RunnableAliveBitField\000"
+ 1027      756E6E61 
+ 1027      626C6541 
+ 1027      6C697665 
+ 1027      42697446 
+ 1028              	.LASF57:
+ 1029 041b 57445F41 		.ascii	"WD_Alive\000"
+ 1029      6C697665 
+ 1029      00
+ 1030              	.LASF72:
+ 1031 0424 433A5C55 		.ascii	"C:\\Users\\giris\\OneDrive\\Documents\\PSoC Creator"
+ 1031      73657273 
+ 1031      5C676972 
+ 1031      69735C4F 
+ 1031      6E654472 
+ 1032 0452 5C454141 		.ascii	"\\EAA\\Assignment1.cydsn\000"
+ 1032      5C417373 
+ 1032      69676E6D 
+ 1032      656E7431 
+ 1032      2E637964 
+ 1033              	.LASF35:
+ 1034 0469 52435F45 		.ascii	"RC_ERROR_CANCELED\000"
+ 1034      52524F52 
+ 1034      5F43414E 
+ 1034      43454C45 
+ 1034      4400
+ 1035              	.LASF73:
+ 1036 047b 5744545F 		.ascii	"WDT_TimeOut\000"
+ 1036      54696D65 
+ 1036      4F757400 
+ 1037              	.LASF66:
+ 1038 0487 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 1038      52784275 
+ 1038      66666572 
+ 1038      00
+ 1039              	.LASF14:
+ 1040 0494 52435F45 		.ascii	"RC_ERROR\000"
+ 1040      52524F52 
+ 1040      00
+ 1041              	.LASF71:
+ 1042 049d 736F7572 		.ascii	"source\\bsw\\WatchDogTimer.c\000"
+ 1042      63655C62 
+ 1042      73775C57 
+ 1042      61746368 
+ 1042      446F6754 
+ 1043              	.LASF17:
+ 1044 04b8 52435F45 		.ascii	"RC_ERROR_MEMORY\000"
+ARM GAS  C:\Users\giris\AppData\Local\Temp\ccwnzKbc.s 			page 25
+
+
+ 1044      52524F52 
+ 1044      5F4D454D 
+ 1044      4F525900 
+ 1045              	.LASF60:
+ 1046 04c8 45455F6F 		.ascii	"EE_oo_IRQ_disable_count\000"
+ 1046      6F5F4952 
+ 1046      515F6469 
+ 1046      7361626C 
+ 1046      655F636F 
+ 1047              	.LASF58:
+ 1048 04e0 74696D65 		.ascii	"timeout\000"
+ 1048      6F757400 
+ 1049              	.LASF39:
+ 1050 04e8 52435F74 		.ascii	"RC_t\000"
+ 1050      00
+ 1051              	.LASF69:
+ 1052 04ed 43795764 		.ascii	"CyWdtClear\000"
+ 1052      74436C65 
+ 1052      617200
+ 1053              	.LASF24:
+ 1054 04f8 52435F45 		.ascii	"RC_ERROR_TIME_OUT\000"
+ 1054      52524F52 
+ 1054      5F54494D 
+ 1054      455F4F55 
+ 1054      5400
+ 1055              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
