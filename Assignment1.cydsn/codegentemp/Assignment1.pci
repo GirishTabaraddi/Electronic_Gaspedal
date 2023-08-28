@@ -1,0 +1,11 @@
+# Assignment1
+# 2023-05-17 13:08:01Z
+
+set_io "JOYSTICK_X(0)" iocell 0 0
+set_io "RGB_G(0)" iocell 2 4
+set_io "LED_red(0)" iocell 0 6
+set_io "Rx_UARTLOG(0)" iocell 12 6
+set_io "JOYSTICK_Y(0)" iocell 0 1
+set_io "TX_DEBUGLOG(0)" iocell 12 7
+set_io "WDT_Button(0)" iocell 0 3
+set_location "\JOYSTICK_ADC_XY:SAR:ADC_SAR\" sarcell -1 -1 0
